@@ -2003,6 +2003,7 @@ $("#autobet_lose_exceed").on("change", function (e) {
     $("#autobet_lose_exceed").val(loseExceedsValue);
 });
 
+let diceGameMode = "manual";
 let autoBetStatus = false;
 let autoBetStopStatus = true;
 let currentNumberOfBets = 0;
@@ -2013,6 +2014,7 @@ let switchHighLowMode;
 let previousBetStatus;
 
 function autobet() {
+    diceGameMode = "auto";
     let maxBetAmount = $("#max_bet_amount").val();
     let maxNumberBets = $("#number_of_bets").val();
     let profitAboveLimit = $("#autobet_profit_above").val();
@@ -2095,151 +2097,7 @@ function autobet() {
             rollNumber: $("#roll_number").val().trim(),
             rollDirection: rollDirection,
         };
-        $.ajax({
-            url: "/api/bet",
-            type: "POST",
-            timeout: 5000,
-            data: JSON.stringify(formData),
-            contentType: "application/json",
-            success: function (response) {
-                if (response.valid === false) {
-                    toastError(response.message);
-                    stopSlotMachine();
-                    $("#machine_result1").text(0);
-                    $("#machine_result2").text(0);
-                    $("#machine_result3").text(0);
-                    $("#machine_result4").text(0);
-                    autoBetStopStatus = true;
-                    autoBetStatus = false;
-                    $("#button_autobet_start").removeClass("hide");
-                    $("#button_autobet_stop").addClass("hide");
-                } else {
-                    stopSlotMachine();
-                    let resultArrayNumber = Array.from(
-                        response.message.rollResult.toString()
-                    ).map(Number);
-                    let arrayCorrectLength = 4;
-                    if (arrayCorrectLength - resultArrayNumber.length > 0) {
-                        let addNumberZeros =
-                            arrayCorrectLength - resultArrayNumber.length;
-                        while (addNumberZeros) {
-                            resultArrayNumber.unshift(0);
-                            addNumberZeros--;
-                        }
-                    }
-                    $("#machine_result1").text(resultArrayNumber[0]);
-                    $("#machine_result2").text(resultArrayNumber[1]);
-                    $("#machine_result3").text(resultArrayNumber[2]);
-                    $("#machine_result4").text(resultArrayNumber[3]);
-                    $("#current_server_seed_hashed").val(
-                        response.message.currentServerSeedHashed
-                    );
-                    $("#current_client_seed").val(
-                        response.message.currentClientSeed
-                    );
-                    $("#current_nonce").val(response.message.nextNonce);
-                    $("#bitcoin_balance").text(
-                        `BTC ${response.message.balance}`
-                    );
-                    if (response.message.betStatus === "win") {
-                        playWinSound();
-                        $("#machine_result1").addClass("machine-result-green");
-                        $("#machine_result2").addClass("machine-result-green");
-                        $("#machine_result3").addClass("machine-result-green");
-                        $("#machine_result4").addClass("machine-result-green");
-                        currentProfit += Number($("#bet_profit").val());
-                        let onWinRadioSelection = $(
-                            'input[name="actionOnWin"]:checked'
-                        ).val();
-                        previousBetStatus = "win";
-                        if (onWinRadioSelection === "changebetby") {
-                            let newAmount =
-                                $("#bet_amount").val() *
-                                ($("#on_win_change_bet_value").val() / 100 + 1);
-                            newAmount = Number(newAmount).toFixed(8);
-                            if (newAmount < 0.0000001) newAmount = "0.00000010";
-                            $("#bet_amount").val(newAmount);
-                            calculateBetProfit();
-                        } else if (onWinRadioSelection === "resettobase") {
-                            $("#bet_amount").val(baseBet);
-                            calculateBetProfit();
-                        } else {
-                            autoBetStopStatus = true;
-                            autoBetStatus = false;
-                            $("#button_autobet_start").removeClass("hide");
-                            $("#button_autobet_stop").addClass("hide");
-                            toastSuccess(
-                                "Autobet finished. Stop on win triggered."
-                            );
-                            return;
-                        }
-                    }
-                    if (response.message.betStatus === "lose") {
-                        playLoseSound();
-
-                        $("#machine_result1").addClass("machine-result-red");
-                        $("#machine_result2").addClass("machine-result-red");
-                        $("#machine_result3").addClass("machine-result-red");
-                        $("#machine_result4").addClass("machine-result-red");
-                        currentProfit -= Number($("#bet_amount").val());
-                        previousBetStatus = "lose";
-                        let onWinRadioSelection = $(
-                            'input[name="actionOnLose"]:checked'
-                        ).val();
-                        if (onWinRadioSelection === "changebetby") {
-                            let newAmount =
-                                $("#bet_amount").val() *
-                                ($("#on_lose_change_bet_value").val() / 100 +
-                                    1);
-                            newAmount = Number(newAmount).toFixed(8);
-                            if (newAmount < 0.0000001) newAmount = "0.00000010";
-                            $("#bet_amount").val(newAmount);
-                            calculateBetProfit();
-                        } else if (onWinRadioSelection === "resettobase") {
-                            $("#bet_amount").val(baseBet);
-                            calculateBetProfit();
-                        } else {
-                            autoBetStopStatus = true;
-                            autoBetStatus = false;
-                            $("#button_autobet_start").removeClass("hide");
-                            $("#button_autobet_stop").addClass("hide");
-                            toastSuccess(
-                                "Autobet finished. Stop on loss triggered."
-                            );
-                            return;
-                        }
-                    }
-
-                    currentNumberOfBets += 1;
-
-                    if (autoBetStopStatus === true) {
-                        autoBetStatus = false;
-                        toastSuccess("Autobet stopped");
-                        return;
-                    } else {
-                        setTimeout(autobet, 400);
-                    }
-                }
-            },
-            error: function (x, t, m) {
-                if (x.status === 403) {
-                    toastError("Please sign up first");
-                    openSignUpModal();
-                } else {
-                    toastWarning("Connection issue. Please try again.");
-                }
-                stopSlotMachine();
-                $("#machine_result1").text(0);
-                $("#machine_result2").text(0);
-                $("#machine_result3").text(0);
-                $("#machine_result4").text(0);
-                autoBetStopStatus = true;
-                autoBetStatus = false;
-                $("#button_autobet_start").removeClass("hide");
-                $("#button_autobet_stop").addClass("hide");
-                return;
-            },
-        });
+        socket.emit('bet', formData);
     } else {
         autoBetStopStatus = true;
         autoBetStatus = false;
@@ -2278,6 +2136,7 @@ $("#button_autobet_stop").click(function (e) {
 let manualBetStatus = false;
 
 $("#button_bet").click(function (e) {
+    diceGameMode = "manual";
     $("#machine_result1").removeClass("machine-result-green");
     $("#machine_result2").removeClass("machine-result-green");
     $("#machine_result3").removeClass("machine-result-green");
@@ -2307,101 +2166,217 @@ $("#button_bet").click(function (e) {
         var formData = {
             betAmount: $("#bet_amount").val().trim(),
             rollNumber: $("#roll_number").val().trim(),
-            rollDirection: rollDirection,
+            rollDirection: rollDirection
         };
-        $.ajax({
-            url: "/api/bet",
-            type: "POST",
-            timeout: 5000,
-            data: JSON.stringify(formData),
-            contentType: "application/json",
-            success: function (response) {
-                if (response.valid === false) {
-                    toastError(response.message);
-                    stopSlotMachine();
-                    $("#machine_result1").text(0);
-                    $("#machine_result2").text(0);
-                    $("#machine_result3").text(0);
-                    $("#machine_result4").text(0);
-                } else {
-                    stopSlotMachine();
-                    if (!response.message.rollResult) {
-                        console.log(response.message.rollResult);
-                    }
-
-                    let resultArrayNumber = Array.from(
-                        response.message.rollResult.toString()
-                    ).map(Number);
-                    let arrayCorrectLength = 4;
-                    if (arrayCorrectLength - resultArrayNumber.length > 0) {
-                        let addNumberZeros =
-                            arrayCorrectLength - resultArrayNumber.length;
-                        while (addNumberZeros) {
-                            resultArrayNumber.unshift(0);
-                            addNumberZeros--;
-                        }
-                    }
-                    $("#machine_result1").text(resultArrayNumber[0]);
-                    $("#machine_result2").text(resultArrayNumber[1]);
-                    $("#machine_result3").text(resultArrayNumber[2]);
-                    $("#machine_result4").text(resultArrayNumber[3]);
-                    $("#current_server_seed_hashed").val(
-                        response.message.currentServerSeedHashed
-                    );
-                    $("#current_client_seed").val(
-                        response.message.currentClientSeed
-                    );
-                    $("#current_nonce").val(response.message.nextNonce);
-                    $("#bitcoin_balance").text(
-                        `BTC ${response.message.balance}`
-                    );
-                    if (response.message.betStatus === "win") {
-                        playWinSound();
-
-                        $("#machine_result1").addClass("machine-result-green");
-                        $("#machine_result2").addClass("machine-result-green");
-                        $("#machine_result3").addClass("machine-result-green");
-                        $("#machine_result4").addClass("machine-result-green");
-                    }
-                    if (response.message.betStatus === "lose") {
-                        playLoseSound();
-
-                        $("#machine_result1").addClass("machine-result-red");
-                        $("#machine_result2").addClass("machine-result-red");
-                        $("#machine_result3").addClass("machine-result-red");
-                        $("#machine_result4").addClass("machine-result-red");
-                    }
-                }
-                if (switchTab === "manual") {
-                    $("#button_bet").removeClass("hide");
-                }
-                $("#button_bet_loading").addClass("hide");
-                $("#button_bet").prop("disabled", false);
-                manualBetStatus = false;
-            },
-            error: function (x, t, m) {
-                if (x.status === 403) {
-                    toastError("Please sign up first");
-                    openSignUpModal();
-                } else {
-                    toastWarning("Connection issue. Please try again.");
-                }
-                stopSlotMachine();
-                $("#machine_result1").text(0);
-                $("#machine_result2").text(0);
-                $("#machine_result3").text(0);
-                $("#machine_result4").text(0);
-                if (switchTab === "manual") {
-                    $("#button_bet").removeClass("hide");
-                }
-                $("#button_bet_loading").addClass("hide");
-                $("#button_bet").prop("disabled", false);
-                manualBetStatus = false;
-            },
-        });
+        socket.emit('bet', formData);
     } else {
         $("#button_bet").prop("disabled", false);
         toastError(validity.message);
+    }
+});
+
+socket.on('bet', function(response){
+    if (response === 'unauthenticated') {
+        stopSlotMachine();
+        $("#machine_result1").text(0);
+        $("#machine_result2").text(0);
+        $("#machine_result3").text(0);
+        $("#machine_result4").text(0);
+        if (switchTab === "manual") {
+            $("#button_bet").removeClass("hide");
+            $("#button_bet_loading").addClass("hide");
+            $("#button_bet").prop("disabled", false);
+        } else {
+            autoBetStopStatus = true;
+            autoBetStatus = false;
+            $("#button_autobet_start").removeClass("hide");
+            $("#button_autobet_stop").addClass("hide");
+        }
+        toastError("Please sign up first");
+        return openSignUpModal();
+    }
+    if (diceGameMode === "manual"){
+        if (response.valid === false) {
+            toastError(response.message);
+            stopSlotMachine();
+            $("#machine_result1").text(0);
+            $("#machine_result2").text(0);
+            $("#machine_result3").text(0);
+            $("#machine_result4").text(0);
+        } else {
+            stopSlotMachine();
+            if (!response.message.rollResult) {
+                console.log(response.message.rollResult);
+            }
+    
+            let resultArrayNumber = Array.from(
+                response.message.rollResult.toString()
+            ).map(Number);
+            let arrayCorrectLength = 4;
+            if (arrayCorrectLength - resultArrayNumber.length > 0) {
+                let addNumberZeros =
+                    arrayCorrectLength - resultArrayNumber.length;
+                while (addNumberZeros) {
+                    resultArrayNumber.unshift(0);
+                    addNumberZeros--;
+                }
+            }
+            $("#machine_result1").text(resultArrayNumber[0]);
+            $("#machine_result2").text(resultArrayNumber[1]);
+            $("#machine_result3").text(resultArrayNumber[2]);
+            $("#machine_result4").text(resultArrayNumber[3]);
+            $("#current_server_seed_hashed").val(
+                response.message.currentServerSeedHashed
+            );
+            $("#current_client_seed").val(
+                response.message.currentClientSeed
+            );
+            $("#current_nonce").val(response.message.nextNonce);
+            $("#bitcoin_balance").text(
+                `BTC ${response.message.balance}`
+            );
+            if (response.message.betStatus === "win") {
+                playWinSound();
+    
+                $("#machine_result1").addClass("machine-result-green");
+                $("#machine_result2").addClass("machine-result-green");
+                $("#machine_result3").addClass("machine-result-green");
+                $("#machine_result4").addClass("machine-result-green");
+            }
+            if (response.message.betStatus === "lose") {
+                playLoseSound();
+    
+                $("#machine_result1").addClass("machine-result-red");
+                $("#machine_result2").addClass("machine-result-red");
+                $("#machine_result3").addClass("machine-result-red");
+                $("#machine_result4").addClass("machine-result-red");
+            }
+        }
+        if (switchTab === "manual") {
+            $("#button_bet").removeClass("hide");
+        }
+        $("#button_bet_loading").addClass("hide");
+        $("#button_bet").prop("disabled", false);
+        manualBetStatus = false;
+    } else {
+        if (response.valid === false) {
+            toastError(response.message);
+            stopSlotMachine();
+            $("#machine_result1").text(0);
+            $("#machine_result2").text(0);
+            $("#machine_result3").text(0);
+            $("#machine_result4").text(0);
+            autoBetStopStatus = true;
+            autoBetStatus = false;
+            $("#button_autobet_start").removeClass("hide");
+            $("#button_autobet_stop").addClass("hide");
+        } else {
+            stopSlotMachine();
+            let resultArrayNumber = Array.from(
+                response.message.rollResult.toString()
+            ).map(Number);
+            let arrayCorrectLength = 4;
+            if (arrayCorrectLength - resultArrayNumber.length > 0) {
+                let addNumberZeros =
+                    arrayCorrectLength - resultArrayNumber.length;
+                while (addNumberZeros) {
+                    resultArrayNumber.unshift(0);
+                    addNumberZeros--;
+                }
+            }
+            $("#machine_result1").text(resultArrayNumber[0]);
+            $("#machine_result2").text(resultArrayNumber[1]);
+            $("#machine_result3").text(resultArrayNumber[2]);
+            $("#machine_result4").text(resultArrayNumber[3]);
+            $("#current_server_seed_hashed").val(
+                response.message.currentServerSeedHashed
+            );
+            $("#current_client_seed").val(
+                response.message.currentClientSeed
+            );
+            $("#current_nonce").val(response.message.nextNonce);
+            $("#bitcoin_balance").text(
+                `BTC ${response.message.balance}`
+            );
+            if (response.message.betStatus === "win") {
+                playWinSound();
+                $("#machine_result1").addClass("machine-result-green");
+                $("#machine_result2").addClass("machine-result-green");
+                $("#machine_result3").addClass("machine-result-green");
+                $("#machine_result4").addClass("machine-result-green");
+                currentProfit += Number($("#bet_profit").val());
+                let onWinRadioSelection = $(
+                    'input[name="actionOnWin"]:checked'
+                ).val();
+                previousBetStatus = "win";
+                if (onWinRadioSelection === "changebetby") {
+                    let newAmount =
+                        $("#bet_amount").val() *
+                        ($("#on_win_change_bet_value").val() / 100 + 1);
+                    newAmount = Number(newAmount).toFixed(8);
+                    if (newAmount < 0.0000001) newAmount = "0.00000010";
+                    $("#bet_amount").val(newAmount);
+                    calculateBetProfit();
+                } else if (onWinRadioSelection === "resettobase") {
+                    $("#bet_amount").val(baseBet);
+                    calculateBetProfit();
+                } else {
+                    autoBetStopStatus = true;
+                    autoBetStatus = false;
+                    $("#button_autobet_start").removeClass("hide");
+                    $("#button_autobet_stop").addClass("hide");
+                    toastSuccess(
+                        "Autobet finished. Stop on win triggered."
+                    );
+                    return;
+                }
+            }
+            if (response.message.betStatus === "lose") {
+                playLoseSound();
+
+                $("#machine_result1").addClass("machine-result-red");
+                $("#machine_result2").addClass("machine-result-red");
+                $("#machine_result3").addClass("machine-result-red");
+                $("#machine_result4").addClass("machine-result-red");
+                currentProfit -= Number($("#bet_amount").val());
+                previousBetStatus = "lose";
+                let onWinRadioSelection = $(
+                    'input[name="actionOnLose"]:checked'
+                ).val();
+                if (onWinRadioSelection === "changebetby") {
+                    let newAmount =
+                        $("#bet_amount").val() *
+                        ($("#on_lose_change_bet_value").val() / 100 +
+                            1);
+                    newAmount = Number(newAmount).toFixed(8);
+                    if (newAmount < 0.0000001) newAmount = "0.00000010";
+                    $("#bet_amount").val(newAmount);
+                    calculateBetProfit();
+                } else if (onWinRadioSelection === "resettobase") {
+                    $("#bet_amount").val(baseBet);
+                    calculateBetProfit();
+                } else {
+                    autoBetStopStatus = true;
+                    autoBetStatus = false;
+                    $("#button_autobet_start").removeClass("hide");
+                    $("#button_autobet_stop").addClass("hide");
+                    toastSuccess(
+                        "Autobet finished. Stop on loss triggered."
+                    );
+                    return;
+                }
+            }
+
+            currentNumberOfBets += 1;
+
+            if (autoBetStopStatus === true) {
+                autoBetStatus = false;
+                toastSuccess("Autobet stopped");
+                return;
+            } else {
+                setTimeout(autobet, 300);
+            }
+        }
     }
 });
 
@@ -2890,7 +2865,7 @@ class Slider {
             var snd = new Audio();
             var src = document.createElement("source");
             src.type = "audio/mpeg";
-            src.src = "assets/knob.mp3";
+            src.src = "https://cryptodiceio.imfast.io/knob.mp3";
             snd.appendChild(src);
             this.sounds.push(snd);
         }
