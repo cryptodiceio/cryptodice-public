@@ -2374,7 +2374,7 @@ socket.on('bet', function(response){
                 toastSuccess("Autobet stopped");
                 return;
             } else {
-                setTimeout(autobet, 300);
+                setTimeout(autobet, 500);
             }
         }
     }
