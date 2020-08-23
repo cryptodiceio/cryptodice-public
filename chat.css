@@ -779,7 +779,7 @@
           height: 17px; } }
 
       .rain {
-        background: url(/assets/chatRain.svg);
+        background: url(https://cdn.statically.io/gh/cryptodiceio/cryptodice-public/564776e3/chatRain.svg);
         background-position: center;
         background-size: 160%;
         animation-fill-mode: forwards;
