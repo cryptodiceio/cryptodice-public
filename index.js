@@ -318,7 +318,7 @@ $("#button_withdraw_submit").click(function (e) {
     $.ajax({
         url: url,
         type: "POST",
-        timeout: 5000,
+        timeout: 10000,
         data: JSON.stringify(formData),
         contentType: "application/json",
         success: function (response) {
@@ -1370,7 +1370,7 @@ $("#button_invest").on("click", function (e) {
     $.ajax({
         url: url,
         type: "GET",
-        timeout: 10000,
+        timeout: 30000,
         success: function (response) {
             if (response.valid === false) {
                 toastError(response.message);
