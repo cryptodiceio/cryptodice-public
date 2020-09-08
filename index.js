@@ -318,7 +318,7 @@ $("#button_withdraw_submit").click(function (e) {
     $.ajax({
         url: url,
         type: "POST",
-        timeout: 10000,
+        timeout: 30000,
         data: JSON.stringify(formData),
         contentType: "application/json",
         success: function (response) {
