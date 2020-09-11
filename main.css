@@ -1810,6 +1810,8 @@ input[type="range"]::-webkit-slider-runnable-track {
     border-radius: 25px;
 }
 input[type="range"]::-webkit-slider-thumb {
+    background-color: transparent;
+    border: 0;
     height: 4rem;
     width: 4rem;
     cursor: pointer;
