@@ -2345,14 +2345,7 @@ input[type="range"]::-webkit-slider-thumb {
   
   .winlose2{
     display:block;
-    position:relative;
-  }
-  
-  .winlose2 img{
-    margin-top:-3px;
-    vertical-align:middle;
-    width:20px;
-    height:20px;
+    position:absolute;
   }
   
   .winlose{
@@ -2360,18 +2353,11 @@ input[type="range"]::-webkit-slider-thumb {
     position:absolute;
   }
   
-  .winlose img{
-    margin-top:-3px;
-    vertical-align:middle;
-    width:20px;
-    height:20px;
-  }
-  
   .oneGameWin {
       color: #3ecf8e;
       animation-direction: reverse;
-      -webkit-animation-duration: .7s;
-      animation-duration: .7s;
+      -webkit-animation-duration: .5s;
+      animation-duration: .5s;
       -webkit-animation-timing-function: ease-out;
       animation-timing-function: ease-out;
       -webkit-animation-name: cWLpaY;
@@ -2382,8 +2368,8 @@ input[type="range"]::-webkit-slider-thumb {
       color: #ce5257;
       -webkit-animation-direction: normal;
       animation-direction: normal;
-      -webkit-animation-duration: .7s;
-      animation-duration: .7s;
+      -webkit-animation-duration: .5s;
+      animation-duration: .5s;
       -webkit-animation-timing-function: ease-out;
       animation-timing-function: ease-out;
       -webkit-animation-name: cWLpaY;

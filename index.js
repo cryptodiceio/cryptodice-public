@@ -46,6 +46,15 @@ function randomString(length) {
     return randomString;
 }
 
+const winBalanceAnimated = document.querySelector('#win_balance_animation');
+const loseBalanceAnimated = document.querySelector('#lose_balance_animation');
+winBalanceAnimated.addEventListener('animationend', () => {
+    $("#win_balance_animation").hide();
+});
+loseBalanceAnimated.addEventListener('animationend', () => {
+    $("#lose_balance_animation").hide();
+});
+
 //Check if user logged in on page load, and change right navbar correspondingly
 $(document).ready(function () {
     const button = document.querySelector('#emoji-button');
@@ -67,6 +76,8 @@ $(document).ready(function () {
             if (response.valid === false) {
                 toastWarning(response.message);
             } else {
+                $("#win_balance_animation").hide();
+                $("#lose_balance_animation").hide();
                 $("#button_logout_loading").hide();
                 $("#button_bitcoin_balance").removeClass("hide");
                 $("#button_user").removeClass("hide");
@@ -251,6 +262,8 @@ $("#button_login_submit").click(function (e) {
             if (response.valid === false) {
                 toastError(response.message);
             } else {
+                $("#win_balance_animation").hide();
+                $("#lose_balance_animation").hide();
                 $("#button_bitcoin_balance").removeClass("hide");
                 $("#button_user").removeClass("hide");
                 $("#button_deposit").removeClass("hide");
@@ -2235,9 +2248,13 @@ socket.on('bet', function(response){
             $("#bitcoin_balance").text(
                 `BTC ${response.message.balance}`
             );
+            $("#win_balance_animation").removeClass("oneGameWin");
+            $("#lose_balance_animation").removeClass("oneGameLose");
             if (response.message.betStatus === "win") {
                 playWinSound();
-    
+                $("#win_balance_animation").show();
+                $("#win_balance_animation").addClass("oneGameWin");
+                $("#win_ani_balance").text(`BTC ${Math.abs(response.message.profit).toFixed(8)}`);
                 $("#machine_result1").addClass("machine-result-green");
                 $("#machine_result2").addClass("machine-result-green");
                 $("#machine_result3").addClass("machine-result-green");
@@ -2245,7 +2262,9 @@ socket.on('bet', function(response){
             }
             if (response.message.betStatus === "lose") {
                 playLoseSound();
-    
+                $("#lose_balance_animation").show();
+                $("#lose_balance_animation").addClass("oneGameLose");
+                $("#lose_ani_balance").text(`BTC ${Math.abs(response.message.profit).toFixed(8)}`);
                 $("#machine_result1").addClass("machine-result-red");
                 $("#machine_result2").addClass("machine-result-red");
                 $("#machine_result3").addClass("machine-result-red");
@@ -2298,8 +2317,13 @@ socket.on('bet', function(response){
             $("#bitcoin_balance").text(
                 `BTC ${response.message.balance}`
             );
+            $("#win_balance_animation").removeClass("oneGameWin");
+            $("#lose_balance_animation").removeClass("oneGameLose");
             if (response.message.betStatus === "win") {
                 playWinSound();
+                $("#win_balance_animation").show();
+                $("#win_balance_animation").addClass("oneGameWin");
+                $("#win_ani_balance").text(`BTC ${Math.abs(response.message.profit).toFixed(8)}`);
                 $("#machine_result1").addClass("machine-result-green");
                 $("#machine_result2").addClass("machine-result-green");
                 $("#machine_result3").addClass("machine-result-green");
@@ -2333,7 +2357,9 @@ socket.on('bet', function(response){
             }
             if (response.message.betStatus === "lose") {
                 playLoseSound();
-
+                $("#lose_balance_animation").show();
+                $("#lose_balance_animation").addClass("oneGameLose");
+                $("#lose_ani_balance").text(`BTC ${Math.abs(response.message.profit).toFixed(8)}`);
                 $("#machine_result1").addClass("machine-result-red");
                 $("#machine_result2").addClass("machine-result-red");
                 $("#machine_result3").addClass("machine-result-red");
@@ -2374,7 +2400,7 @@ socket.on('bet', function(response){
                 toastSuccess("Autobet stopped");
                 return;
             } else {
-                setTimeout(autobet, 500);
+                setTimeout(autobet, 400);
             }
         }
     }
