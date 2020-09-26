@@ -243,7 +243,7 @@ button.balance:hover {
     color: #dbdbdb;
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 1300px) {
     .container {
         padding: 2.5% 5% 2% 5%;
         margin-top: 1rem;
@@ -259,7 +259,7 @@ button.balance:hover {
     }
 }
 
-@media only screen and (min-width: 1024px) {
+@media only screen and (min-width: 1300px) {
     .container {
         padding: 2.5% 10% 2% 10%;
     }
@@ -707,7 +707,7 @@ button.balance:hover {
     padding-bottom: 0.5rem;
 }
 @media only screen and (max-width: 760px),
-    (min-device-width: 768px) and (max-device-width: 1024px) {
+    (min-device-width: 768px) and (max-device-width: 1300px) {
     .modal-bankroll {
         width: 100%;
     }
@@ -1765,7 +1765,7 @@ input:checked + .slider:before {
         transform: translateX(0);
     }
 }
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 1300px) {
     .input.scaling {
         font-size: 0.85rem;
     }
@@ -2037,7 +2037,7 @@ input[type="range"]::-webkit-slider-thumb {
     max-width: 30rem;
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 1300px) {
     .share-icon svg {
         margin-bottom: 0.5rem;
     }
@@ -2324,4 +2324,93 @@ input[type="range"]::-webkit-slider-thumb {
   .containercoundown ul li span {
     display: block;
     font-size: 3.5rem;
+  }
+
+  .navbar-dropdown{
+    background:#192C38;
+    border-top:2px solid #192C38;
+  }
+  .navbar-dropdown a{
+    color:#F7F8F8;
+  }
+  
+  .navbar-item-dropdown:hover{
+    background:#192C38 !important;
+    color:#3273DC !important;
+  }
+  
+  .navbar-burger{
+    color:#3273DC !important;
+  }
+  
+  .winlose2{
+    display:block;
+    position:relative;
+  }
+  
+  .winlose2 img{
+    margin-top:-3px;
+    vertical-align:middle;
+    width:20px;
+    height:20px;
+  }
+  
+  .winlose{
+    display:block;
+    position:absolute;
+  }
+  
+  .winlose img{
+    margin-top:-3px;
+    vertical-align:middle;
+    width:20px;
+    height:20px;
+  }
+  
+  .oneGameWin {
+      color: #3ecf8e;
+      animation-direction: reverse;
+      -webkit-animation-duration: .7s;
+      animation-duration: .7s;
+      -webkit-animation-timing-function: ease-out;
+      animation-timing-function: ease-out;
+      -webkit-animation-name: cWLpaY;
+      animation-name: cWLpaY;
+  }
+  
+  .oneGameLose {
+      color: #ce5257;
+      -webkit-animation-direction: normal;
+      animation-direction: normal;
+      -webkit-animation-duration: .7s;
+      animation-duration: .7s;
+      -webkit-animation-timing-function: ease-out;
+      animation-timing-function: ease-out;
+      -webkit-animation-name: cWLpaY;
+      animation-name: cWLpaY;
+  }
+  
+  @keyframes cWLpaY {
+  0% {
+      -webkit-transform: translateY(0);
+      transform: translateY(0);
+      opacity: 0;
+      z-index: 0;
+  }
+  
+  20% {
+      opacity: 1;
+      z-index: 1;
+  }
+  80% {
+      opacity: 1;
+      z-index: 1;
+  }
+  100% {
+      -webkit-transform: translateY(150%);
+      transform: translateY(150%);
+      opacity: 0;
+      z-index: 0;
+  }
+  
   }
